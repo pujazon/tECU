@@ -93,3 +93,31 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s
 clean:
 	@echo "Cleaning build directory..."
 	@$(call RM, $(BUILD_DIR))
+
+# ============================================================================
+# Flash Target (Requires BIN_PATH and FLASH_ADDR parameters)
+# ============================================================================
+
+# TODO: Refactor to allow positional arguments (make flash <bin_path> <address>)
+#       using MAKECMDGOALS or a wrapper script instead of explicit variable assignments.
+.PHONY: flash
+flash:
+# 1. Check if both mandatory parameters are provided
+ifeq ($(strip $(BIN_PATH)),)
+	@echo "ERROR: Missing 'BIN_PATH'. Usage: make flash BIN_PATH=<path_to_bin> FLASH_ADDR=<address>" && exit 1
+endif
+
+ifeq ($(strip $(FLASH_ADDR)),)
+	@echo "ERROR: Missing 'FLASH_ADDR'. Usage: make flash BIN_PATH=<path_to_bin> FLASH_ADDR=<address>" && exit 1
+endif
+
+# 2. Check if st-flash CLI tool is available in PATH
+	@st-flash --version >NUL 2>&1 || st-flash --version >/dev/null 2>&1 || (echo "ERROR: 'st-flash' not found in PATH. Please run 'setup_env.bat'." && exit 1)
+
+# 3. Perform the flash operation
+	@echo "============================================================"
+	@echo " Starting flash process..."
+	@echo " Binary Path : $(BIN_PATH)"
+	@echo " Address     : $(FLASH_ADDR)"
+	@echo "============================================================"
+	st-flash write $(BIN_PATH) $(FLASH_ADDR)

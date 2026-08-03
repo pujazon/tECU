@@ -3,16 +3,16 @@ setlocal enabledelayedexpansion
 
 set CFG_FILE=%~dp0local_env.cfg
 
-:: Verificar si existe el archivo de configuración local
+:: Verify if the local configuration file exists
 if not exist "%CFG_FILE%" (
-    echo [ERROR] No se encontro el archivo scripts\local_env.cfg
-    echo [INFO] Copia scripts\local_env.cfg.template a scripts\local_env.cfg y configura tus rutas.
+    echo [ERROR] Could not find scripts\local_env.cfg
+    echo [INFO] Copy scripts\local_env.cfg.template to scripts\local_env.cfg and set your paths.
     exit /b 1
 )
 
-echo [tECU] Cargando configuracion desde local_env.cfg...
+echo [tECU] Loading configuration from local_env.cfg...
 
-:: Parsear el archivo .cfg ignorando lineas vacias y comentarios (#)
+:: Parse the .cfg file ignoring empty lines and comments (#)
 for /f "usebackq tokens=1,* delims==" %%A in ("%CFG_FILE%") do (
     set "LINE=%%A"
     if not "!LINE:~0,1!"=="#" (
@@ -22,20 +22,25 @@ for /f "usebackq tokens=1,* delims==" %%A in ("%CFG_FILE%") do (
     )
 )
 
-:: Exportar las variables leidas al entorno del usuario (CMD)
+:: Export the parsed variables to the user environment (CMD)
 endlocal & (
     set "ARM_GCC_PATH=%ARM_GCC_PATH%"
     set "MAKE_PATH=%MAKE_PATH%"
+    set "STLINK_PATH=%STLINK_PATH%"
+    set "LIBUSB_PATH=%LIBUSB_PATH%"
 )
 
-:: Aplicar las rutas al PATH de la sesión actual
+:: Apply paths to current session PATH
 if defined ARM_GCC_PATH set "PATH=%ARM_GCC_PATH%;%PATH%"
 if defined MAKE_PATH set "PATH=%MAKE_PATH%;%PATH%"
+if defined STLINK_PATH set "PATH=%STLINK_PATH%;%PATH%"
+if defined LIBUSB_PATH set "PATH=%LIBUSB_PATH%;%PATH%"
+if defined ST_FLASH_PATH set "PATH=%ST_FLASH_PATH%;%PATH%"
 
-:: Alias opcional para 'make'
+:: Optional alias for 'make'
 doskey make=mingw32-make $*
 
-echo [tECU] Entorno cargado con exito.
+echo [tECU] Environment loaded successfully.
 echo --------------------------------------------------
 arm-none-eabi-g++ --version | findstr /C:"arm-none-eabi-g++"
 echo --------------------------------------------------
