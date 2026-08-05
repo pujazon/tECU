@@ -35,7 +35,6 @@ if defined ARM_GCC_PATH set "PATH=%ARM_GCC_PATH%;%PATH%"
 if defined MAKE_PATH set "PATH=%MAKE_PATH%;%PATH%"
 if defined STLINK_PATH set "PATH=%STLINK_PATH%;%PATH%"
 if defined LIBUSB_PATH set "PATH=%LIBUSB_PATH%;%PATH%"
-if defined ST_FLASH_PATH set "PATH=%ST_FLASH_PATH%;%PATH%"
 
 :: Optional alias for 'make'
 doskey make=mingw32-make $*

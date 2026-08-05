@@ -1,3 +1,12 @@
+# Default goal when running 'make' without arguments
+.DEFAULT_GOAL := info
+
+# Include local environment configuration (if available)
+-include scripts/local_env.cfg
+
+# Include ST-Link flashing module
+include make/flasher.mk
+
 # ==============================================================================
 # OPERATING SYSTEM DETECTION
 # ==============================================================================
@@ -56,14 +65,28 @@ LDFLAGS   = $(MCU_FLAGS) -specs=nano.specs -specs=nosys.specs \
 # ==============================================================================
 # BUILD RULES
 # ==============================================================================
-.PHONY: all clean info
+.PHONY: build clean info
 
-all: info $(TARGET).elf $(TARGET).hex $(TARGET).bin
-
+## Print helper with available commands
 info:
-	@echo "--------------------------------------------------"
-	@echo " Building tECU on OS: $(TARGET_OS)"
-	@echo "--------------------------------------------------"
+	@echo "============================================================"
+	@echo " tECU Firmware Build System (OS: $(TARGET_OS))"
+	@echo "============================================================"
+	@echo " Usage: make <target>"
+	@echo ""
+	@echo " Build Targets:"
+	@echo "   build        - Compile source files and generate ELF, HEX, and BIN"
+	@echo "   clean        - Remove all generated files in build/ directory"
+	@echo ""
+	@echo " Flashing Targets (ST-Link Serial: $(STLINK_SERIAL)):"
+	@echo "   flash        - Flash binary to MCU (default: $(TARGET).bin at 0x08000000)"
+	@echo "   flash-debug  - Flash binary with verbose debugging output"
+	@echo "   probe        - Query connected ST-Link programmers"
+	@echo "   reset        - Reset target MCU via SWD"
+	@echo "============================================================"
+
+## Build target binary files (.elf, .hex, .bin)
+build: $(TARGET).elf $(TARGET).hex $(TARGET).bin
 
 $(TARGET).elf: $(OBJS)
 	@$(call MKDIR, $(BUILD_DIR))
@@ -93,31 +116,3 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s
 clean:
 	@echo "Cleaning build directory..."
 	@$(call RM, $(BUILD_DIR))
-
-# ============================================================================
-# Flash Target (Requires BIN_PATH and FLASH_ADDR parameters)
-# ============================================================================
-
-# TODO: Refactor to allow positional arguments (make flash <bin_path> <address>)
-#       using MAKECMDGOALS or a wrapper script instead of explicit variable assignments.
-.PHONY: flash
-flash:
-# 1. Check if both mandatory parameters are provided
-ifeq ($(strip $(BIN_PATH)),)
-	@echo "ERROR: Missing 'BIN_PATH'. Usage: make flash BIN_PATH=<path_to_bin> FLASH_ADDR=<address>" && exit 1
-endif
-
-ifeq ($(strip $(FLASH_ADDR)),)
-	@echo "ERROR: Missing 'FLASH_ADDR'. Usage: make flash BIN_PATH=<path_to_bin> FLASH_ADDR=<address>" && exit 1
-endif
-
-# 2. Check if st-flash CLI tool is available in PATH
-	@st-flash --version >NUL 2>&1 || st-flash --version >/dev/null 2>&1 || (echo "ERROR: 'st-flash' not found in PATH. Please run 'setup_env.bat'." && exit 1)
-
-# 3. Perform the flash operation
-	@echo "============================================================"
-	@echo " Starting flash process..."
-	@echo " Binary Path : $(BIN_PATH)"
-	@echo " Address     : $(FLASH_ADDR)"
-	@echo "============================================================"
-	st-flash write $(BIN_PATH) $(FLASH_ADDR)

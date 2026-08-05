@@ -13,7 +13,7 @@ This project implements a deterministic, production-grade ECU application design
 * **Peripherals & Interfaces:** bxCAN/FDCAN, USART (DMA/Interrupts), TIM (PWM Generation), GPIO, Ultrasonic Sensors (HC-SR04).
 * **Wireless Gateway:** Bluetooth (HC-05/06) pass-through module.
 * **Actuators:** Dual DC Motor Driver (H-Bridge L298N/TB6612FNG) on a 2WD robot chassis.
-* **Toolchain:** `arm-none-eabi-gcc`, C++17, CMake / STM32Cube.
+* **Toolchain:** `arm-none-eabi-gcc` (C++17), GNU Make, `stlink` utilities (`st-flash`, `st-info`).
 
 ---
 
@@ -25,32 +25,32 @@ This project implements a deterministic, production-grade ECU application design
 * **Automated CI/CD & Emulation:** Self-hosted CI runner executing on a Raspberry Pi, performing automated cross-compilation builds and system-level integration tests via STM32 emulation (**Renode / QEMU**).
 
 ---
-## 🛠️ Build & Toolchain
 
-This project uses an independent build system based on **GNU Make** and the **Arm GNU Toolchain (`arm-none-eabi-g++`)** cross-compiler. The build system is completely decoupled from any vendor IDE (such as Keil or STM32CubeIDE) to ensure consistent compilation across local developer environments and Continuous Integration (CI/CD) pipelines.
+## 🛠️ Build & Environment Setup
+
+This project uses an independent build system based on **GNU Make** and the **Arm GNU Toolchain (`arm-none-eabi-g++`)**. The build system is completely decoupled from any vendor IDE (such as Keil or STM32CubeIDE) to ensure consistent compilation across local developer environments and Continuous Integration (CI/CD) pipelines.
 
 ---
 
 ### 1. Prerequisites
 
-Before building the project, ensure you have the following tools installed on your system:
+Ensure you have the following tools installed on your system:
 
 | Tool | Recommended Version | Description |
 | :--- | :--- | :--- |
-| **Arm GNU Toolchain** | `13.x` or higher (`arm-none-eabi-gcc` / `g++`) | Official cross-compiler for ARM Cortex-M |
+| **Arm GNU Toolchain** | `13.x` / `15.x` (`arm-none-eabi-gcc` / `g++`) | Official cross-compiler for ARM Cortex-M |
 | **GNU Make** | `4.x` (`mingw32-make` on Windows) | Build automation engine |
+| **ST-Link Utilities** | `1.8.0` (`st-flash`, `st-info`) | Open-source ST-Link programmer tools |
+| **libusb** | `1.0.x` | Required library dependency for `stlink` |
 
 ---
 
-### 2. Local Environment Setup (`local_env.cfg`)
+### 2. ST-Link Configuration Setup (`config/chips`)
 
-To avoid hardcoding system-absolute paths into the repository and to allow developers to configure their own installation paths without altering Git tracking:
+When using standalone builds of `stlink` on Windows, `st-flash` requires access to the target MCU chip description files (`.chipc` / `.chip`). 
 
-1. Navigate to the `./scripts/` directory.
-2. Copy `local_env.cfg.template` to `local_env.cfg`:
-   ```bash
-   # On Windows (CMD)
-   copy scripts\local_env.cfg.template scripts\local_env.cfg
-   ```
-   # On Linux / macOS
-   cp scripts/local_env.cfg.template scripts/local_env.cfg
+Make sure to copy the `config/chips` folder from your `stlink` distribution directory directly into the directory where `st-flash.exe` is located (or into the root of your toolchain path):
+
+```cmd
+:: Example for Windows (CMD)
+xcopy /E /I "C:\Users\<user>\Documents\Tools\stlink-1.8.0\config\chips" "C:\Users\<user>\Documents\Tools\stlink-1.8.0\stlink-1.8.0-win32\bin\config\chips"
