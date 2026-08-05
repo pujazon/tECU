@@ -1,171 +1,189 @@
 .syntax unified
-  .cpu cortex-m4
-  .fpu softvfp
-  .thumb
+.cpu cortex-m4
+.fpu softvfp
+.thumb
 
-/* ============================================================================
- * Stack and Heap Configuration
- * ============================================================================ */
-  .equ  Stack_Size, 0x00000400
-  .section .stack
-  .align 3
-  .globl __initial_sp
-  .globl Stack_Mem
-Stack_Mem:
-  .space Stack_Size
-__initial_sp:
+.global g_pfnVectors
+.global Default_Handler
 
-  .equ  Heap_Size, 0x00000200
-  .section .heap
-  .align 3
-  .globl __heap_base
-  .globl __heap_limit
-  .globl Heap_Mem
-__heap_base:
-Heap_Mem:
-  .space Heap_Size
-__heap_limit:
+/* Symbols exported by the linker script (stm32f407vg.ld) */
+.word _sidata
+.word _sdata
+.word _edata
+.word _sbss
+.word _ebss
 
 /* ============================================================================
  * Vector Table
  * ============================================================================ */
   .section .isr_vector,"a",%progbits
-  .type __Vectors, %object
-  .size __Vectors, .-__Vectors
+  .type g_pfnVectors, %object
+  .size g_pfnVectors, .-g_pfnVectors
 
-  .globl __Vectors
-  .globl __Vectors_End
-  .globl __Vectors_Size
+g_pfnVectors:
+  .word _estack                  /* Top of Stack defined in linker script */
+  .word Reset_Handler            /* Reset Handler */
+  .word NMI_Handler
+  .word HardFault_Handler
+  .word MemManage_Handler
+  .word BusFault_Handler
+  .word UsageFault_Handler
+  .word 0
+  .word 0
+  .word 0
+  .word 0
+  .word SVC_Handler
+  .word DebugMon_Handler
+  .word 0
+  .word PendSV_Handler
+  .word SysTick_Handler
 
-__Vectors:
-  .long  __initial_sp               /* Top of Stack */
-  .long  Reset_Handler              /* Reset Handler */
-  .long  NMI_Handler                /* NMI Handler */
-  .long  HardFault_Handler          /* Hard Fault Handler */
-  .long  MemManage_Handler          /* MPU Fault Handler */
-  .long  BusFault_Handler           /* Bus Fault Handler */
-  .long  UsageFault_Handler         /* Usage Fault Handler */
-  .long  0                          /* Reserved */
-  .long  0                          /* Reserved */
-  .long  0                          /* Reserved */
-  .long  0                          /* Reserved */
-  .long  SVC_Handler                /* SVCall Handler */
-  .long  DebugMon_Handler           /* Debug Monitor Handler */
-  .long  0                          /* Reserved */
-  .long  PendSV_Handler             /* PendSV Handler */
-  .long  SysTick_Handler            /* SysTick Handler */
-
-  /* External Interrupts */
-  .long  WWDG_IRQHandler
-  .long  PVD_IRQHandler
-  .long  TAMP_STAMP_IRQHandler
-  .long  RTC_WKUP_IRQHandler
-  .long  FLASH_IRQHandler
-  .long  RCC_IRQHandler
-  .long  EXTI0_IRQHandler
-  .long  EXTI1_IRQHandler
-  .long  EXTI2_IRQHandler
-  .long  EXTI3_IRQHandler
-  .long  EXTI4_IRQHandler
-  .long  DMA1_Stream0_IRQHandler
-  .long  DMA1_Stream1_IRQHandler
-  .long  DMA1_Stream2_IRQHandler
-  .long  DMA1_Stream3_IRQHandler
-  .long  DMA1_Stream4_IRQHandler
-  .long  DMA1_Stream5_IRQHandler
-  .long  DMA1_Stream6_IRQHandler
-  .long  ADC_IRQHandler
-  .long  CAN1_TX_IRQHandler
-  .long  CAN1_RX0_IRQHandler
-  .long  CAN1_RX1_IRQHandler
-  .long  CAN1_SCE_IRQHandler
-  .long  EXTI9_5_IRQHandler
-  .long  TIM1_BRK_TIM9_IRQHandler
-  .long  TIM1_UP_TIM10_IRQHandler
-  .long  TIM1_TRG_COM_TIM11_IRQHandler
-  .long  TIM1_CC_IRQHandler
-  .long  TIM2_IRQHandler
-  .long  TIM3_IRQHandler
-  .long  TIM4_IRQHandler
-  .long  I2C1_EV_IRQHandler
-  .long  I2C1_ER_IRQHandler
-  .long  I2C2_EV_IRQHandler
-  .long  I2C2_ER_IRQHandler
-  .long  SPI1_IRQHandler
-  .long  SPI2_IRQHandler
-  .long  USART1_IRQHandler
-  .long  USART2_IRQHandler
-  .long  USART3_IRQHandler
-  .long  EXTI15_10_IRQHandler
-  .long  RTC_Alarm_IRQHandler
-  .long  OTG_FS_WKUP_IRQHandler
-  .long  TIM8_BRK_TIM12_IRQHandler
-  .long  TIM8_UP_TIM13_IRQHandler
-  .long  TIM8_TRG_COM_TIM14_IRQHandler
-  .long  TIM8_CC_IRQHandler
-  .long  DMA1_Stream7_IRQHandler
-  .long  FMC_IRQHandler
-  .long  SDIO_IRQHandler
-  .long  TIM5_IRQHandler
-  .long  SPI3_IRQHandler
-  .long  UART4_IRQHandler
-  .long  UART5_IRQHandler
-  .long  TIM6_DAC_IRQHandler
-  .long  TIM7_IRQHandler
-  .long  DMA2_Stream0_IRQHandler
-  .long  DMA2_Stream1_IRQHandler
-  .long  DMA2_Stream2_IRQHandler
-  .long  DMA2_Stream3_IRQHandler
-  .long  DMA2_Stream4_IRQHandler
-  .long  ETH_IRQHandler
-  .long  ETH_WKUP_IRQHandler
-  .long  CAN2_TX_IRQHandler
-  .long  CAN2_RX0_IRQHandler
-  .long  CAN2_RX1_IRQHandler
-  .long  CAN2_SCE_IRQHandler
-  .long  OTG_FS_IRQHandler
-  .long  DMA2_Stream5_IRQHandler
-  .long  DMA2_Stream6_IRQHandler
-  .long  DMA2_Stream7_IRQHandler
-  .long  USART6_IRQHandler
-  .long  I2C3_EV_IRQHandler
-  .long  I2C3_ER_IRQHandler
-  .long  OTG_HS_EP1_OUT_IRQHandler
-  .long  OTG_HS_EP1_IN_IRQHandler
-  .long  OTG_HS_WKUP_IRQHandler
-  .long  OTG_HS_IRQHandler
-  .long  DCMI_IRQHandler
-  .long  0
-  .long  HASH_RNG_IRQHandler
-  .long  FPU_IRQHandler
-
-__Vectors_End:
-  .equ __Vectors_Size, __Vectors_End - __Vectors
+  /* External Interrupts (STM32F407) */
+  .word WWDG_IRQHandler
+  .word PVD_IRQHandler
+  .word TAMP_STAMP_IRQHandler
+  .word RTC_WKUP_IRQHandler
+  .word FLASH_IRQHandler
+  .word RCC_IRQHandler
+  .word EXTI0_IRQHandler
+  .word EXTI1_IRQHandler
+  .word EXTI2_IRQHandler
+  .word EXTI3_IRQHandler
+  .word EXTI4_IRQHandler
+  .word DMA1_Stream0_IRQHandler
+  .word DMA1_Stream1_IRQHandler
+  .word DMA1_Stream2_IRQHandler
+  .word DMA1_Stream3_IRQHandler
+  .word DMA1_Stream4_IRQHandler
+  .word DMA1_Stream5_IRQHandler
+  .word DMA1_Stream6_IRQHandler
+  .word ADC_IRQHandler
+  .word CAN1_TX_IRQHandler
+  .word CAN1_RX0_IRQHandler
+  .word CAN1_RX1_IRQHandler
+  .word CAN1_SCE_IRQHandler
+  .word EXTI9_5_IRQHandler
+  .word TIM1_BRK_TIM9_IRQHandler
+  .word TIM1_UP_TIM10_IRQHandler
+  .word TIM1_TRG_COM_TIM11_IRQHandler
+  .word TIM1_CC_IRQHandler
+  .word TIM2_IRQHandler
+  .word TIM3_IRQHandler
+  .word TIM4_IRQHandler
+  .word I2C1_EV_IRQHandler
+  .word I2C1_ER_IRQHandler
+  .word I2C2_EV_IRQHandler
+  .word I2C2_ER_IRQHandler
+  .word SPI1_IRQHandler
+  .word SPI2_IRQHandler
+  .word USART1_IRQHandler
+  .word USART2_IRQHandler
+  .word USART3_IRQHandler
+  .word EXTI15_10_IRQHandler
+  .word RTC_Alarm_IRQHandler
+  .word OTG_FS_WKUP_IRQHandler
+  .word TIM8_BRK_TIM12_IRQHandler
+  .word TIM8_UP_TIM13_IRQHandler
+  .word TIM8_TRG_COM_TIM14_IRQHandler
+  .word TIM8_CC_IRQHandler
+  .word DMA1_Stream7_IRQHandler
+  .word FMC_IRQHandler
+  .word SDIO_IRQHandler
+  .word TIM5_IRQHandler
+  .word SPI3_IRQHandler
+  .word UART4_IRQHandler
+  .word UART5_IRQHandler
+  .word TIM6_DAC_IRQHandler
+  .word TIM7_IRQHandler
+  .word DMA2_Stream0_IRQHandler
+  .word DMA2_Stream1_IRQHandler
+  .word DMA2_Stream2_IRQHandler
+  .word DMA2_Stream3_IRQHandler
+  .word DMA2_Stream4_IRQHandler
+  .word ETH_IRQHandler
+  .word ETH_WKUP_IRQHandler
+  .word CAN2_TX_IRQHandler
+  .word CAN2_RX0_IRQHandler
+  .word CAN2_RX1_IRQHandler
+  .word CAN2_SCE_IRQHandler
+  .word OTG_FS_IRQHandler
+  .word DMA2_Stream5_IRQHandler
+  .word DMA2_Stream6_IRQHandler
+  .word DMA2_Stream7_IRQHandler
+  .word USART6_IRQHandler
+  .word I2C3_EV_IRQHandler
+  .word I2C3_ER_IRQHandler
+  .word OTG_HS_EP1_OUT_IRQHandler
+  .word OTG_HS_EP1_IN_IRQHandler
+  .word OTG_HS_WKUP_IRQHandler
+  .word OTG_HS_IRQHandler
+  .word DCMI_IRQHandler
+  .word 0
+  .word HASH_RNG_IRQHandler
+  .word FPU_IRQHandler
 
 /* ============================================================================
- * Reset Code and Exception Handlers
+ * Reset Handler
  * ============================================================================ */
   .section .text.Reset_Handler
   .weak Reset_Handler
   .type Reset_Handler, %function
 Reset_Handler:
-  ldr   sp, =__initial_sp
-  ldr   r0, =SystemInit
-  blx   r0
-  ldr   r0, =main
-  bx    r0
+  ldr   sp, =_estack
+
+/* 1. Copy initialized .data section from FLASH to RAM */
+  ldr   r0, =_sdata
+  ldr   r1, =_edata
+  ldr   r2, =_sidata
+  movs  r3, #0
+  b     LoopCopyDataInit
+
+CopyDataInit:
+  ldr   r4, [r2, r3]
+  str   r4, [r0, r3]
+  adds  r3, r3, #4
+
+LoopCopyDataInit:
+  adds  r4, r0, r3
+  cmp   r4, r1
+  bcc   CopyDataInit
+
+/* 2. Zero-fill the uninitialized .bss section in RAM */
+  ldr   r2, =_sbss
+  ldr   r4, =_ebss
+  movs  r3, #0
+  b     LoopFillZerobss
+
+FillZerobss:
+  str   r3, [r2]
+  adds  r2, r2, #4
+
+LoopFillZerobss:
+  cmp   r2, r4
+  bcc   FillZerobss
+
+/* 3. System Clock / HW initialization */
+  bl    SystemInit
+
+/* 4. C++ runtime initialization (calls constructors for global objects) */
+  bl    __libc_init_array
+
+/* 5. Jump to main application entry */
+  bl    main
+
+LoopForever:
+  b     LoopForever
   .size Reset_Handler, .-Reset_Handler
 
-/* Default Handler for Unhandled Interrupts */
+/* ============================================================================
+ * Default Interrupt Handlers
+ * ============================================================================ */
   .section .text.Default_Handler,"ax",%progbits
-  .global Default_Handler
-  .type Default_Handler, %function
 Default_Handler:
 Infinite_Loop:
   b     Infinite_Loop
   .size Default_Handler, .-Default_Handler
 
-/* Macro to Declare Weak Interrupt Handlers Mapping to Default_Handler */
   .macro def_irq_handler handler_name
   .weak  \handler_name
   .set   \handler_name, Default_Handler
@@ -180,7 +198,6 @@ Infinite_Loop:
   def_irq_handler DebugMon_Handler
   def_irq_handler PendSV_Handler
   def_irq_handler SysTick_Handler
-
   def_irq_handler WWDG_IRQHandler
   def_irq_handler PVD_IRQHandler
   def_irq_handler TAMP_STAMP_IRQHandler
@@ -263,18 +280,5 @@ Infinite_Loop:
   def_irq_handler HASH_RNG_IRQHandler
   def_irq_handler FPU_IRQHandler
 
-/* ============================================================================
- * Optional C Library (Newlib) Stack and Heap Initializer
- * ============================================================================ */
-  .section .text.__user_initial_stackheap,"ax",%progbits
-  .global __user_initial_stackheap
-  .type __user_initial_stackheap, %function
-__user_initial_stackheap:
-  ldr   r0, =Heap_Mem
-  ldr   r1, =(Stack_Mem + Stack_Size)
-  ldr   r2, =(Heap_Mem + Heap_Size)
-  ldr   r3, =Stack_Mem
-  bx    lr
-  .size __user_initial_stackheap, . - __user_initial_stackheap
-
   .end
+  

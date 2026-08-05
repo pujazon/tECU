@@ -49,7 +49,7 @@ TARGET = $(BUILD_DIR)/tECU_firmware
 # ==============================================================================
 # COMPILER & LINKER FLAGS (Cortex-M4F + C++17 Freestanding)
 # ==============================================================================
-MCU_FLAGS = -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -DSTM32F407xx
+MCU_FLAGS = -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=soft -DSTM32F407xx
 
 INCLUDES  = -I$(SRC_DIR) -I$(INC_DIR)
 
@@ -59,8 +59,8 @@ CXXFLAGS  = $(MCU_FLAGS) -std=c++17 -Wall -Wextra -Werror \
 
 CFLAGS    = $(MCU_FLAGS) -Wall -Wextra -ffunction-sections -fdata-sections $(INCLUDES)
 
-LDFLAGS   = $(MCU_FLAGS) -specs=nano.specs -specs=nosys.specs \
-            -Wl,--gc-sections
+LDFLAGS  = $(MCU_FLAGS) --specs=nosys.specs -Wl,--gc-sections
+LDFLAGS += -T./cfg/default.ld
 
 # ==============================================================================
 # BUILD RULES
